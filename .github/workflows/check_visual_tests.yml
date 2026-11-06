@@ -11,7 +11,7 @@ concurrency:
 jobs:
   setup:
     name: "Setup VTests workflow"
-    runs-on: ubuntu-slim
+    runs-on: self-hosted
     outputs:
       do_run: ${{ steps.output_data.outputs.do_run }}
       reference_ref: ${{ steps.output_data.outputs.reference_ref }}
@@ -61,7 +61,7 @@ jobs:
 
   build_current:
     name: "Build current"
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: setup
     if: needs.setup.outputs.do_run == 'true'
     steps:
@@ -127,7 +127,7 @@ jobs:
 
   build_reference:
     name: "Build reference"
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: setup
     if: needs.setup.outputs.do_run == 'true'
     steps:
@@ -193,7 +193,7 @@ jobs:
 
   generate_and_compare:
     name: "Generate and Compare"
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: [setup, build_current, build_reference]
     if: needs.setup.outputs.do_run == 'true'
     steps:
