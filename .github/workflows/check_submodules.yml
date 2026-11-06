@@ -16,7 +16,7 @@ jobs:
 
     - name: Verify muse_framework submodule URL
       run: |
-        ACTUAL_URL=$(git config -f .gitmodules submodule.muse_framework.url)
+        ACTUAL_URL=$(awk '/^\[submodule "muse_framework"\]/{section=1; next} /^\[/{section=0} section && /^[[:space:]]*url[[:space:]]*=/{sub(/^[[:space:]]*url[[:space:]]*=[[:space:]]*/, ""); print; exit}' .gitmodules)
         echo "Expected: ${EXPECTED_URL}"
         echo "Actual:   ${ACTUAL_URL}"
         if [ "${ACTUAL_URL}" != "${EXPECTED_URL}" ]; then
