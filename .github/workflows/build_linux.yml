@@ -267,6 +267,7 @@ jobs:
     - name: Build
       env:
         DOCKWIDGETS_V2: ${{ inputs.dockwidgets_v2 == 'ON' && 'ON' || 'OFF' }}
+        MUSESCORE_BUILD_JOBS: '2'
       run: |
         bash ./buildscripts/ci/linux/build.sh -n "${BUILD_NUMBER}" --crash_log_url "${SENTRY_URL}" --arch ${{ matrix.arch }} --build-pipewire --dockwidgets_v2 "${DOCKWIDGETS_V2}"
     - name: Show ccache stats
