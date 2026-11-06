@@ -74,6 +74,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Ensure full checkout
+      run: git sparse-checkout disable
+
     - parallel:
       - name: Restore ccache files
         id: restore-ccache
@@ -93,6 +96,8 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: '1'
       with:
         setup-python: false
         version: 6.11.2
@@ -143,6 +148,9 @@ jobs:
       with:
         ref: ${{ needs.setup.outputs.reference_ref }}
         submodules: recursive
+
+    - name: Ensure full checkout
+      run: git sparse-checkout disable
 
     - parallel:
       - name: Restore ccache files
