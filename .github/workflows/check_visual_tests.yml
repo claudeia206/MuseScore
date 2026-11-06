@@ -111,6 +111,8 @@ jobs:
         bash ./buildscripts/ci/linux/setup.sh
 
     - name: Build and Pack
+      env:
+        MUSESCORE_BUILD_JOBS: '2'
       run: |
         bash ./buildscripts/ci/vtests/build_and_pack.sh
 
@@ -171,6 +173,8 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: '1'
       with:
         setup-python: false
         version: 6.11.2
@@ -184,6 +188,8 @@ jobs:
         bash ./buildscripts/ci/linux/setup.sh
 
     - name: Build and Pack
+      env:
+        MUSESCORE_BUILD_JOBS: '2'
       run: |
         bash ./buildscripts/ci/vtests/build_and_pack.sh
     - name: Show ccache stats
