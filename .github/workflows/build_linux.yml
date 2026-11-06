@@ -119,6 +119,9 @@ jobs:
         ref: ${{ inputs.app_ref || github.ref }}
         submodules: recursive
 
+    - name: Ensure full checkout
+      run: git sparse-checkout disable
+
     - name: Override muse_framework
       if: inputs.framework_ref != '' && inputs.framework_repo != ''
       uses: actions/checkout@v7
@@ -230,6 +233,8 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: '1'
       with:
         setup-python: false
         version: 6.11.2
