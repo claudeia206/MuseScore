@@ -67,6 +67,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
+        setup-python: false
         version: 6.11.2
         host: all_os
         target: 'wasm'
