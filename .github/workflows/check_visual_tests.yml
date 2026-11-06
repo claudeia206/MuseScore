@@ -22,6 +22,7 @@ jobs:
       with:
         submodules: recursive
         sparse-checkout: buildscripts/ci/tools/make_build_number.sh
+        sparse-checkout-cone-mode: false
     - name: "Configure workflow"
       run: |
         bash ./buildscripts/ci/tools/make_build_number.sh
@@ -88,6 +89,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
+        setup-python: false
         version: 6.11.2
         host: 'linux'
         target: 'desktop'
