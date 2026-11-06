@@ -19,7 +19,7 @@ jobs:
     - name: Ensure full checkout
       run: git sparse-checkout disable
     - name: Install CMake
-      run: sudo apt-get update && sudo apt-get install -y cmake
+      run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
     - name: Setup environment
       run: |
         bash ./buildscripts/ci/withoutqt/setup.sh
