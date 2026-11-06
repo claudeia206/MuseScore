@@ -6,7 +6,7 @@ on:
 
 jobs:
   check_muse_framework:
-    runs-on: ubuntu-slim
+    runs-on: self-hosted
     env:
       EXPECTED_URL: https://github.com/musescore/muse_framework.git
       EXPECTED_BRANCH: main
