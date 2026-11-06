@@ -228,6 +228,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
+        setup-python: false
         version: 6.11.2
         host: ${{ matrix.qt-host }}
         target: 'desktop'
