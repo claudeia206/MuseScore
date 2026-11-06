@@ -30,6 +30,9 @@ jobs:
 
         echo "BUILD_NUMBER=$BUILD_NUMBER" | tee -a $GITHUB_ENV
 
+    - name: Restore full checkout after sparse setup
+      run: git sparse-checkout disable
+
     - name: Get reference commit for PR
       if: github.event_name == 'pull_request'
       env:
@@ -86,6 +89,8 @@ jobs:
           sudo apt-get install -y ccache
           bash ./muse/buildscripts/ci/tools/setup_ccache_config.sh
 
+    - name: Install pip for system Python
+      run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -154,6 +159,8 @@ jobs:
           sudo apt-get install -y ccache
           bash ./muse/buildscripts/ci/tools/setup_ccache_config.sh
 
+    - name: Install pip for system Python
+      run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
