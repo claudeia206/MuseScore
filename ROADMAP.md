@@ -16,6 +16,7 @@ Disposer d'une chaîne de contribution fiable sur Linux Mint, sans dégrader les
 - [x] Sérialiser les compilations courante et de référence des tests visuels.
 - [ ] Valider une compilation Linux complète sur le runner Mint.
 - [ ] Vérifier par un `workflow_dispatch` que les lancements manuels exécutent réellement les compilations et comparaisons.
+- [x] Désactiver la persistance des identifiants Git dans les quatre checkout du workflow visuel pour éviter les en-têtes `Authorization` dupliqués sur le runner persistant.
 
 Critère de sortie : build Linux terminé avec succès sur le SHA courant, sans arrêt de compilateur lié à la mémoire.
 
@@ -23,6 +24,7 @@ Critère de sortie : build Linux terminé avec succès sur le SHA courant, sans 
 
 - [x] Ajouter au déclenchement manuel une référence explicite (branche ou SHA), avec `main` par défaut.
 - [ ] Exécuter successivement le build courant, le build de référence, puis la comparaison des images.
+- [ ] Confirmer que la correction `persist-credentials: false` permet au clonage et aux sous-modules de passer.
 - [ ] Conserver les rapports et artefacts utiles en cas d'échec.
 - [ ] Distinguer un échec de comparaison d'un échec de compilation.
 - [ ] Documenter les limites connues du runner (RAM, espace disque, durée).
@@ -68,5 +70,6 @@ Critère de sortie : un contributeur peut comprendre un échec avec le run, les 
 
 - Pull request : [#1 — CI Linux Mint](https://github.com/claudeia206/MuseScore/pull/1)
 - Branche : ci/self-hosted-linux-mint vers main
-- Dernier état connu : les compilations de tests visuels ont été sérialisées pour limiter la pression mémoire. Le lancement manuel précédent n'avait exécuté que la préparation ; la validation visuelle complète reste à faire.
-- Prochaine action : rendre le lancement manuel des tests visuels réellement exécutable, puis lancer et examiner un run complet sur le runner Mint.
+- Dernier diagnostic : le run manuel `42346944802` échoue pendant le checkout avec `Duplicate header: Authorization` (HTTP 400), avant la configuration du workflow ; les trois jobs de build/comparaison sont donc ignorés. Le job Linux x64 `42346928263` a été annulé pendant l'initialisation, avant compilation ; ARM64 a réussi.
+- Correction commitée : `7aacc410` ajoute `persist-credentials: false` aux quatre checkout du workflow visuel, le dépôt et ses sous-modules étant publics. Deux nouveaux runs sont en attente : manuel `42347949410` et PR `42347942241`.
+- Prochaine action : vérifier le clonage sur les nouveaux runs, puis obtenir un build Linux x64 et une comparaison visuelle réellement exécutés.
