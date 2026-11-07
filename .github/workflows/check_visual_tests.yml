@@ -142,7 +142,8 @@ jobs:
   build_reference:
     name: "Build reference"
     runs-on: self-hosted
-    needs: setup
+    # Le runner Mint dispose de peu de RAM : éviter deux compilations simultanées.
+    needs: [setup, build_current]
     if: needs.setup.outputs.do_run == 'true'
     steps:
     - name: Clone repository and checkout reference commit
