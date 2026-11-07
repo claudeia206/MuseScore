@@ -3,6 +3,12 @@ name: 'Check: Visual Tests (vtest)'
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      reference_ref:
+        description: 'Branche ou SHA de référence à comparer'
+        required: true
+        type: string
+        default: 'main'
 
 concurrency:
   group: ${{ github.workflow }} ${{ github.event_name }} ${{ github.ref }}
@@ -43,6 +49,19 @@ jobs:
         echo "REFERENCE_REF=$REFERENCE_REF" >> $GITHUB_ENV
         echo "DO_RUN=$DO_RUN" >> $GITHUB_ENV
         echo "PR_INFO= ${{ github.event.pull_request.number }} ${pull_request_title}" >> $GITHUB_ENV
+    - name: Get reference commit for manual run
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        REFERENCE_REF: ${{ inputs.reference_ref }}
+      run: |
+        if [[ -z "$REFERENCE_REF" ]]; then
+          echo "::error::The reference_ref input must not be empty."
+          exit 1
+        fi
+        DO_RUN='true'
+        echo "REFERENCE_REF=$REFERENCE_REF" >> "$GITHUB_ENV"
+        echo "DO_RUN=$DO_RUN" >> "$GITHUB_ENV"
+        echo "PR_INFO= manual reference=$REFERENCE_REF" >> "$GITHUB_ENV"
     - name: Get reference commit for push commit
       if: github.event_name == 'push'
       run: |
