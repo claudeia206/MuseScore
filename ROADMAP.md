@@ -15,13 +15,13 @@ Disposer d'une chaîne de contribution fiable sur Linux Mint, sans dégrader les
 - [x] Limiter à deux tâches de compilation simultanées sur la machine à mémoire contrainte.
 - [x] Sérialiser les compilations courante et de référence des tests visuels.
 - [ ] Valider une compilation Linux complète sur le runner Mint.
-- [ ] Vérifier que les lancements manuels exécutent réellement les compilations et comparaisons.
+- [ ] Vérifier par un `workflow_dispatch` que les lancements manuels exécutent réellement les compilations et comparaisons.
 
 Critère de sortie : build Linux terminé avec succès sur le SHA courant, sans arrêt de compilateur lié à la mémoire.
 
 ## P1 — Fiabiliser les tests visuels
 
-- [ ] Corriger le déclenchement manuel avec une référence explicite (branche ou SHA).
+- [x] Ajouter au déclenchement manuel une référence explicite (branche ou SHA), avec `main` par défaut.
 - [ ] Exécuter successivement le build courant, le build de référence, puis la comparaison des images.
 - [ ] Conserver les rapports et artefacts utiles en cas d'échec.
 - [ ] Distinguer un échec de comparaison d'un échec de compilation.
@@ -31,9 +31,9 @@ Critère de sortie : un run complet prouve que les étapes ont été exécutées
 
 ## P2 — Préserver la couverture multiplateforme
 
-- [ ] Confirmer que les workflows Windows et macOS passent sur le SHA final.
-- [ ] Confirmer les validations Linux sans Qt et les contrôles de sous-modules.
-- [ ] Vérifier les cibles Linux supplémentaires disponibles, notamment ARM64, sans les déclarer validées sans runner adapté.
+- [x] Vérifier les workflows Windows et macOS : succès sur le commit testé.
+- [x] Vérifier Linux sans Qt et les contrôles de sous-modules : succès sur le commit testé.
+- [x] Vérifier la cible Linux ARM64 : succès sur le commit testé (la cible x64 reste à valider).
 - [ ] Contrôler les dépendances, versions d'outils et chemins propres à chaque runner.
 
 Critère de sortie : matrice de CI documentée avec statut réel par plateforme et architecture.
