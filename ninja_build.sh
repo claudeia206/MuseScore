@@ -21,7 +21,9 @@
 
 trap 'echo Build failed; exit 1' ERR
 
-if [ $(which nproc) ]; then
+if [ -n "${MUSESCORE_BUILD_JOBS:-}" ]; then
+    JOBS="${MUSESCORE_BUILD_JOBS}"
+elif [ "$(which nproc)" ]; then
     JOBS=$(nproc --all)
 else
     JOBS=4
