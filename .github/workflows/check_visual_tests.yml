@@ -3,6 +3,12 @@ name: 'Check: Visual Tests (vtest)'
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      reference_ref:
+        description: 'Branche ou SHA de référence à comparer'
+        required: true
+        type: string
+        default: 'main'
 
 concurrency:
   group: ${{ github.workflow }} ${{ github.event_name }} ${{ github.ref }}
@@ -11,7 +17,7 @@ concurrency:
 jobs:
   setup:
     name: "Setup VTests workflow"
-    runs-on: ubuntu-slim
+    runs-on: self-hosted
     outputs:
       do_run: ${{ steps.output_data.outputs.do_run }}
       reference_ref: ${{ steps.output_data.outputs.reference_ref }}
@@ -20,14 +26,19 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v7
       with:
+        persist-credentials: false
         submodules: recursive
         sparse-checkout: buildscripts/ci/tools/make_build_number.sh
+        sparse-checkout-cone-mode: false
     - name: "Configure workflow"
       run: |
         bash ./buildscripts/ci/tools/make_build_number.sh
         BUILD_NUMBER=$(cat ./build.artifacts/env/build_number.env)
 
         echo "BUILD_NUMBER=$BUILD_NUMBER" | tee -a $GITHUB_ENV
+
+    - name: Restore full checkout after sparse setup
+      run: git sparse-checkout disable
 
     - name: Get reference commit for PR
       if: github.event_name == 'pull_request'
@@ -39,6 +50,19 @@ jobs:
         echo "REFERENCE_REF=$REFERENCE_REF" >> $GITHUB_ENV
         echo "DO_RUN=$DO_RUN" >> $GITHUB_ENV
         echo "PR_INFO= ${{ github.event.pull_request.number }} ${pull_request_title}" >> $GITHUB_ENV
+    - name: Get reference commit for manual run
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        REFERENCE_REF: ${{ inputs.reference_ref }}
+      run: |
+        if [[ -z "$REFERENCE_REF" ]]; then
+          echo "::error::The reference_ref input must not be empty."
+          exit 1
+        fi
+        DO_RUN='true'
+        echo "REFERENCE_REF=$REFERENCE_REF" >> "$GITHUB_ENV"
+        echo "DO_RUN=$DO_RUN" >> "$GITHUB_ENV"
+        echo "PR_INFO= manual reference=$REFERENCE_REF" >> "$GITHUB_ENV"
     - name: Get reference commit for push commit
       if: github.event_name == 'push'
       run: |
@@ -61,14 +85,18 @@ jobs:
 
   build_current:
     name: "Build current"
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: setup
     if: needs.setup.outputs.do_run == 'true'
     steps:
     - name: Clone repository
       uses: actions/checkout@v7
       with:
+        persist-credentials: false
         submodules: recursive
+
+    - name: Ensure full checkout
+      run: git sparse-checkout disable
 
     - parallel:
       - name: Restore ccache files
@@ -85,9 +113,14 @@ jobs:
           sudo apt-get install -y ccache
           bash ./muse/buildscripts/ci/tools/setup_ccache_config.sh
 
+    - name: Install pip for system Python
+      run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: '1'
       with:
+        setup-python: false
         version: 6.11.2
         host: 'linux'
         target: 'desktop'
@@ -99,6 +132,8 @@ jobs:
         bash ./buildscripts/ci/linux/setup.sh
 
     - name: Build and Pack
+      env:
+        MUSESCORE_BUILD_JOBS: '2'
       run: |
         bash ./buildscripts/ci/vtests/build_and_pack.sh
 
@@ -127,15 +162,20 @@ jobs:
 
   build_reference:
     name: "Build reference"
-    runs-on: ubuntu-24.04
-    needs: setup
+    runs-on: self-hosted
+    # Le runner Mint dispose de peu de RAM : éviter deux compilations simultanées.
+    needs: [setup, build_current]
     if: needs.setup.outputs.do_run == 'true'
     steps:
     - name: Clone repository and checkout reference commit
       uses: actions/checkout@v7
       with:
+        persist-credentials: false
         ref: ${{ needs.setup.outputs.reference_ref }}
         submodules: recursive
+
+    - name: Ensure full checkout
+      run: git sparse-checkout disable
 
     - parallel:
       - name: Restore ccache files
@@ -152,9 +192,14 @@ jobs:
           sudo apt-get install -y ccache
           bash ./muse/buildscripts/ci/tools/setup_ccache_config.sh
 
+    - name: Install pip for system Python
+      run: sudo apt-get update && sudo apt-get install -y python3-pip
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: '1'
       with:
+        setup-python: false
         version: 6.11.2
         host: 'linux'
         target: 'desktop'
@@ -166,6 +211,8 @@ jobs:
         bash ./buildscripts/ci/linux/setup.sh
 
     - name: Build and Pack
+      env:
+        MUSESCORE_BUILD_JOBS: '2'
       run: |
         bash ./buildscripts/ci/vtests/build_and_pack.sh
     - name: Show ccache stats
@@ -193,13 +240,14 @@ jobs:
 
   generate_and_compare:
     name: "Generate and Compare"
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: [setup, build_current, build_reference]
     if: needs.setup.outputs.do_run == 'true'
     steps:
     - name: Clone repository
       uses: actions/checkout@v7
       with:
+        persist-credentials: false
         submodules: recursive
     - parallel:
       - name: Setup environment

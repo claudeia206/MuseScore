@@ -18,7 +18,7 @@ jobs:
   trigger_nightly:
     name: "Trigger nightly builds"
     if: github.event_name != 'schedule' || github.repository == 'musescore/MuseScore'
-    runs-on: ubuntu-slim
+    runs-on: self-hosted
     steps:
       - name: Trigger nightly builds
         uses: actions/github-script@v9

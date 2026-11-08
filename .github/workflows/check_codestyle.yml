@@ -6,7 +6,7 @@ on:
 
 jobs:
   codestyle:
-    runs-on: ubuntu-slim
+    runs-on: self-hosted
     steps:
     - name: Clone repository
       uses: actions/checkout@v7
