@@ -66,10 +66,15 @@ Critère de sortie : un contributeur peut comprendre un échec avec le run, les 
 5. Ne pas modifier Windows/macOS pour contourner un problème propre au runner Linux Mint.
 6. Cocher une tâche uniquement après preuve dans la CI ou dans le dépôt.
 
-## État de suivi
+## État de suivi — vérifié le 8 novembre 2026
 
-- Pull request : [#1 — CI Linux Mint](https://github.com/claudeia206/MuseScore/pull/1)
-- Branche : ci/self-hosted-linux-mint vers main
-- Dernier diagnostic : le run manuel `42346944802` échoue pendant le checkout avec `Duplicate header: Authorization` (HTTP 400), avant la configuration du workflow ; les trois jobs de build/comparaison sont donc ignorés. Le job Linux x64 `42346928263` a été annulé pendant l'initialisation, avant compilation ; ARM64 a réussi.
-- Correction commitée : `7aacc410` ajoute `persist-credentials: false` aux quatre checkout du workflow visuel, le dépôt et ses sous-modules étant publics. Deux nouveaux runs sont en attente : manuel `42347949410` et PR `42347942241`.
-- Prochaine action : vérifier le clonage sur les nouveaux runs, puis obtenir un build Linux x64 et une comparaison visuelle réellement exécutés.
+- Pull request : [#1 — CI Linux Mint](https://github.com/claudeia206/MuseScore/pull/1), toujours ouverte et non fusionnée.
+- Branche : `ci/self-hosted-linux-mint` vers `main`.
+- SHA PR : `f793fc180d1667752cce17de155929e0e727057f` ; SHA de base `main` : `d299fc2ffcd977d077077da276c512a862c095c7`.
+- Linux, run [42347976570](https://github.com/claudeia206/MuseScore/actions/runs/42347976570), SHA `f793fc1` : ARM64 **success** ; Linux x64 **failure**. Les logs du job [Linux x64](https://github.com/claudeia206/MuseScore/actions/runs/42347976570/job/128329792360) montrent qu'à l'étape Build (`797/2636`), `cc1plus` a été interrompu par un signal, puis `The runner has received a shutdown signal`. Cela ne prouve ni un OOM ni une erreur source ; la cause de l'arrêt du runner reste à établir.
+- Tests visuels PR [42347976119](https://github.com/claudeia206/MuseScore/actions/runs/42347976119), SHA `f793fc1` : Setup **success** ; Build current **cancelled** ; Build reference et Generate and Compare **skipped**.
+- Déclenchement manuel [42347949410](https://github.com/claudeia206/MuseScore/actions/runs/42347949410), SHA `7aacc410` : Setup **success**, référence explicite `main` acceptée ; Build current **cancelled** ; Build reference et Generate and Compare **skipped**. Le déclenchement et la référence sont donc validés jusqu'au Setup, pas la chaîne de compilation/comparaison.
+- Sur le SHA PR `f793fc1` : Windows x64, macOS, Linux sans Qt, codestyle et sous-modules **success** ; ARM64 **success**. Windows portable **skipped** selon la condition du workflow. Linux x64 et tests visuels restent bloquants.
+- Aucune case P0/P1 supplémentaire cochée : les jobs visuels attendus n'ont pas été exécutés.
+- Prochaine action (P0) : diagnostiquer sur la machine Linux Mint le service/log du runner et la cause du signal d'arrêt. Après confirmation du runner opérationnel, relancer uniquement le build Linux x64 et le workflow visuel manuel avec une référence explicite ; vérifier ensuite les trois jobs réellement exécutés. Ne pas attribuer l'arrêt à la mémoire sans preuve locale.
+
